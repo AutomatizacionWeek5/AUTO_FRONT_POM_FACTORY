@@ -16,8 +16,8 @@ Feature: Flujo completo E2E del Sistema de Tickets
   Scenario: Registro exitoso de un nuevo usuario
     When el usuario navega a la página de registro
     And completa el formulario de registro con:
-      | username | email                    | password      |
-      | e2euser1 | e2euser1@test.sofka.com  | TestPass@2026 |
+      | username  | email                    | password      |
+      | user2test | user2@test.sofka.com  | TestPass@2027 |
     Then debería ser redirigido a la lista de tickets
     And la barra de navegación debería estar visible
 

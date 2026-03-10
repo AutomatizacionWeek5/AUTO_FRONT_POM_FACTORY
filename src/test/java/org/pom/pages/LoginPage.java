@@ -1,10 +1,15 @@
 package org.pom.pages;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.pom.utils.WaitUtils;
+
+import java.time.Duration;
 
 /**
  * Page Object para la página de Login.
@@ -114,6 +119,34 @@ public class LoginPage {
         enterEmail(email);
         enterPassword(password);
         clickLoginButton();
+    }
+
+    /**
+     * Ejecuta el flujo completo de login y espera hasta que el sistema
+     * complete la redirección, usando {@link WebDriverWait} +
+     * {@link ExpectedConditions} en lugar de tiempos fijos.
+     *
+     * <p>Devuelve {@code true} si el login fue exitoso (URL ya no contiene
+     * {@code /login}) o {@code false} si apareció un error de autenticación.
+     *
+     * @param email    correo del usuario
+     * @param password contraseña del usuario
+     * @param timeoutSeconds tiempo máximo de espera para la redirección
+     * @return {@code true} si redirigido fuera de /login, {@code false} si error
+     */
+    public boolean loginAndWaitForRedirect(String email, String password, int timeoutSeconds) {
+        login(email, password);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
+        try {
+            // Esperar hasta que la URL salga de /login O aparezca un error visible
+            wait.until(ExpectedConditions.or(
+                ExpectedConditions.not(ExpectedConditions.urlContains("/login")),
+                ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".auth-error"))
+            ));
+        } catch (org.openqa.selenium.TimeoutException ignored) {
+            // Ni se redirigió ni apareció error en el tiempo dado
+        }
+        return !driver.getCurrentUrl().contains("/login");
     }
 
     // ----------------------------------------------------------------

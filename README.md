@@ -68,6 +68,9 @@ La aplicación estará disponible en `http://localhost:3000`.
 # Solo el flujo E2E completo (smoke test)
 ./gradlew test "-Dcucumber.filter.tags=@smoke"
 
+ # Solo tests de login
+./gradlew test "-Dcucumber.filter.tags= @registro"
+
 # Solo tests de login
 ./gradlew test "-Dcucumber.filter.tags=@login"
 
