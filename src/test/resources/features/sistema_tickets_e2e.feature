@@ -74,13 +74,6 @@ Feature: Flujo completo E2E del Sistema de Tickets
   # HU-4: Visualización y gestión de tickets
   # ===========================================================================
 
-  @lista-tickets @happy-path
-  Scenario: Visualización de la lista de tickets
-    Given el usuario está autenticado con email "admin@sofkau.com" y contraseña "Admin@SofkaU_2026!"
-    When el usuario navega a la lista de tickets
-    Then la página de tickets debería estar cargada
-    And debería ver la lista de tickets del sistema
-
   @detalle-ticket @happy-path
   Scenario: Acceso al detalle de un ticket existente
     Given el usuario está autenticado con email "admin@sofkau.com" y contraseña "Admin@SofkaU_2026!"

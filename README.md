@@ -62,30 +62,43 @@ La aplicación estará disponible en `http://localhost:3000`.
 
 ### Ejecutar por tag
 
-```bash
+**PowerShell (Windows)** — el argumento completo debe ir entre comillas:
+
+```powershell
 # Solo el flujo E2E completo (smoke test)
-./gradlew test -Dcucumber.filter.tags="@smoke"
+./gradlew test "-Dcucumber.filter.tags=@smoke"
 
 # Solo tests de login
-./gradlew test -Dcucumber.filter.tags="@login"
+./gradlew test "-Dcucumber.filter.tags=@login"
 
 # Solo tests de creación de tickets
-./gradlew test -Dcucumber.filter.tags="@creacion-ticket"
+./gradlew test "-Dcucumber.filter.tags=@creacion-ticket"
 
 # Tests del flujo admin
+./gradlew test "-Dcucumber.filter.tags=@admin"
+```
+
+**Bash / Git Bash / Linux / Mac:**
+
+```bash
+./gradlew test -Dcucumber.filter.tags="@smoke"
+./gradlew test -Dcucumber.filter.tags="@login"
+./gradlew test -Dcucumber.filter.tags="@creacion-ticket"
 ./gradlew test -Dcucumber.filter.tags="@admin"
 ```
 
+> **Nota PowerShell:** el carácter `@` es un operador especial en PowerShell. Si la propiedad `-D` no va entre comillas completas, PowerShell la interpreta incorrectamente y Gradle no la recibe. Siempre usar `"-Dpropiedad=valor"` en lugar de `-Dpropiedad="valor"`.
+
 ### Ejecutar sin retraso de demo (más rápido)
 
-```bash
-./gradlew test -Ddemo.delay=0
+```powershell
+./gradlew test "-Ddemo.delay=0"
 ```
 
 ### Cambiar la URL base
 
-```bash
-./gradlew test -Dwebdriver.base.url=http://mi-servidor:3000
+```powershell
+./gradlew test "-Dwebdriver.base.url=http://mi-servidor:3000"
 ```
 
 ---
@@ -140,7 +153,6 @@ El `.gitignore` excluye los siguientes archivos y carpetas para evitar subir art
 | `@login @validacion` | Login con credenciales incorrectas |
 | `@creacion-ticket @happy-path` | Creación de ticket exitosa |
 | `@creacion-ticket @formulario` | Visualización del formulario de ticket |
-| `@lista-tickets @happy-path` | Listado de tickets |
 | `@detalle-ticket @happy-path` | Acceso al detalle de un ticket |
 | `@flujo-e2e @smoke` | **Flujo E2E completo** (registro → ticket → detalle) |
 | `@asignaciones @admin` | Acceso a la vista de asignaciones (admin) |
