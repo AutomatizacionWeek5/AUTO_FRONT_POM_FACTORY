@@ -1,6 +1,6 @@
 # AUTO_FRONT_POM_FACTORY — Automatización E2E con Serenity BDD
 
-Proyecto de automatización de pruebas **End-to-End (E2E)** para el **Sistema de Tickets**, implementado con **Java + Serenity BDD + Cucumber + Gradle** siguiendo el patrón **Page Object Model (POM) con Page Factory**.
+Proyecto de automatización de pruebas **End-to-End (E2E)** para el **Sistema de Tickets**, implementado con **Java + Serenity BDD + Cucumber + Gradle** siguiendo el patrón **Page Object Model (POM) con Page Factory** y el principio de **Single Responsibility (SRP)** en step definitions y page objects.
 
 ---
 
@@ -11,24 +11,35 @@ src/
 └── test/
     ├── java/
     │   └── org/pom/
+    │       ├── context/                      # Contexto compartido entre steps
+    │       │   └── TestContext.java          # ThreadLocal: almacena datos del escenario
     │       ├── pages/                        # Page Objects (POM + Page Factory)
-    │       │   ├── LoginPage.java
-    │       │   ├── RegisterPage.java
-    │       │   ├── TicketListPage.java
-    │       │   ├── CreateTicketPage.java
-    │       │   ├── TicketDetailPage.java
-    │       │   ├── AssignmentListPage.java
-    │       │   ├── NotificationListPage.java
-    │       │   └── NavBarPage.java
-    │       ├── stepdefs/                     # Step Definitions (Cucumber)
-    │       │   ├── Hooks.java
-    │       │   └── TicketSystemStepDefs.java
-    │       ├── runner/                       # Test Runner (JUnit + CucumberWithSerenity)
+    │       │   ├── auth/
+    │       │   │   ├── LoginPage.java
+    │       │   │   └── RegisterPage.java
+    │       │   ├── tickets/
+    │       │   │   ├── CreateTicketPage.java
+    │       │   │   ├── TicketListPage.java
+    │       │   │   ├── TicketDetailPage.java
+    │       │   │   └── AssignmentListPage.java
+    │       │   └── shared/
+    │       │       ├── NavBarPage.java
+    │       │       └── NotificationListPage.java
+    │       ├── stepdefs/                     # Step Definitions por responsabilidad
+    │       │   ├── Hooks.java                # @Before / @After (reset de contexto)
+    │       │   ├── UserSetupSteps.java       # Precondiciones: crear/verificar usuario
+    │       │   ├── LoginSteps.java           # Pasos de autenticación
+    │       │   ├── RegisterSteps.java        # Pasos de registro
+    │       │   ├── CreateTicketSteps.java    # Pasos de creación de ticket
+    │       │   ├── TicketListSteps.java      # Pasos de lista y detalle de tickets
+    │       │   └── NavigationSteps.java      # Pasos de navegación general
+    │       ├── runner/                       # Test Runner
     │       │   └── TicketSystemTestRunner.java
     │       └── utils/                        # Utilidades
-    │           ├── TestConfig.java           # Configuración centralizada
-    │           ├── WaitUtils.java            # Esperas explícitas + demo_delay
-    │           └── DriverFactory.java        # Fábrica de WebDriver
+    │           ├── api/ApiHelper.java        # Llamadas HTTP para setup de datos
+    │           ├── config/TestConfig.java    # URLs y configuración centralizada
+    │           ├── driver/DriverFactory.java # Fábrica de WebDriver
+    │           └── wait/WaitUtils.java       # Esperas explícitas
     └── resources/
         ├── features/
         │   └── sistema_tickets_e2e.feature   # Escenarios Gherkin (E2E)
@@ -57,69 +68,100 @@ La aplicación estará disponible en `http://localhost:3000`.
 
 ### Ejecutar todos los escenarios
 
-```bash
+```powershell
 ./gradlew test
-```
-
-### Ejecutar por tag
-
-**PowerShell (Windows)** — el argumento completo debe ir entre comillas:
-
-```powershell
-# Solo el flujo E2E completo (smoke test)
-./gradlew test "-Dcucumber.filter.tags=@smoke"
-
- # Solo tests de login
-./gradlew test "-Dcucumber.filter.tags= @registro"
-
-# Solo tests de login
-./gradlew test "-Dcucumber.filter.tags=@login"
-
-# Solo tests de creación de tickets
-./gradlew test "-Dcucumber.filter.tags=@creacion-ticket"
-
-# Tests del flujo admin
-./gradlew test "-Dcucumber.filter.tags=@admin"
-
-# Panel de notificaciones
-./gradlew test "-Dcucumber.filter.tags=@notificaciones"
-```
-
-**Bash / Git Bash / Linux / Mac:**
-
-```bash
-./gradlew test -Dcucumber.filter.tags="@smoke"
-./gradlew test -Dcucumber.filter.tags="@login"
-./gradlew test -Dcucumber.filter.tags="@creacion-ticket"
-./gradlew test -Dcucumber.filter.tags="@admin"
-./gradlew test -Dcucumber.filter.tags="@notificaciones"
-```
-
-> **Nota PowerShell:** el carácter `@` es un operador especial en PowerShell. Si la propiedad `-D` no va entre comillas completas, PowerShell la interpreta incorrectamente y Gradle no la recibe. Siempre usar `"-Dpropiedad=valor"` en lugar de `-Dpropiedad="valor"`.
-
-### Ejecutar sin retraso de demo (más rápido)
-
-```powershell
-./gradlew test "-Ddemo.delay=0"
-```
-
-### Cambiar la URL base
-
-```powershell
-./gradlew test "-Dwebdriver.base.url=http://mi-servidor:3000"
 ```
 
 ---
 
-## Ver el Reporte Serenity
+### Ejecutar por tag (escenario individual)
 
-Tras ejecutar los tests, el reporte HTML se genera en:
+> **Nota PowerShell:** el carácter `@` es un operador especial en PowerShell. El argumento completo `-D` debe ir entre comillas dobles externas. Siempre usar `"-Dpropiedad=valor"`.
+
+| Qué ejecuta | PowerShell (Windows) | Bash / Git Bash / Linux / Mac |
+|---|---|---|
+| Flujo E2E completo (smoke) | `./gradlew test "-Dcucumber.filter.tags=@smoke"` | `./gradlew test -Dcucumber.filter.tags="@smoke"` |
+| Flujo E2E completo | `./gradlew test "-Dcucumber.filter.tags=@flujo-e2e"` | `./gradlew test -Dcucumber.filter.tags="@flujo-e2e"` |
+| Registro de usuario | `./gradlew test "-Dcucumber.filter.tags=@registro"` | `./gradlew test -Dcucumber.filter.tags="@registro"` |
+| Solo registro exitoso | `./gradlew test "-Dcucumber.filter.tags=@registro and @happy-path"` | `./gradlew test -Dcucumber.filter.tags="@registro and @happy-path"` |
+| Solo validaciones de registro | `./gradlew test "-Dcucumber.filter.tags=@registro and @validacion"` | `./gradlew test -Dcucumber.filter.tags="@registro and @validacion"` |
+| Login | `./gradlew test "-Dcucumber.filter.tags=@login"` | `./gradlew test -Dcucumber.filter.tags="@login"` |
+| Solo login exitoso | `./gradlew test "-Dcucumber.filter.tags=@login and @happy-path"` | `./gradlew test -Dcucumber.filter.tags="@login and @happy-path"` |
+| Solo validaciones de login | `./gradlew test "-Dcucumber.filter.tags=@login and @validacion"` | `./gradlew test -Dcucumber.filter.tags="@login and @validacion"` |
+| Asignaciones (admin) | `./gradlew test "-Dcucumber.filter.tags=@asignaciones"` | `./gradlew test -Dcucumber.filter.tags="@asignaciones"` |
+| Notificaciones | `./gradlew test "-Dcucumber.filter.tags=@notificaciones"` | `./gradlew test -Dcucumber.filter.tags="@notificaciones"` |
+| Logout | `./gradlew test "-Dcucumber.filter.tags=@logout"` | `./gradlew test -Dcucumber.filter.tags="@logout"` |
+
+---
+
+### Combinar y excluir tags
+
+```powershell
+# Ejecutar smoke Y login
+./gradlew test "-Dcucumber.filter.tags=@smoke or @login"
+
+# Ejecutar todo excepto validaciones
+./gradlew test "-Dcucumber.filter.tags=not @validacion"
+
+# Ejecutar happy-path de todos los módulos
+./gradlew test "-Dcucumber.filter.tags=@happy-path"
+```
+
+---
+
+### Opciones adicionales
+
+```powershell
+# Sin retraso de demo (ejecución más rápida)
+./gradlew test "-Ddemo.delay=0"
+
+# Cambiar la URL base de la aplicación
+./gradlew test "-Dwebdriver.base.url=http://mi-servidor:3000"
+
+# Combinar: smoke sin demo delay
+./gradlew test "-Dcucumber.filter.tags=@smoke" "-Ddemo.delay=0"
+```
+
+---
+
+## Reporte Serenity BDD
+
+### Dónde se genera
+
+Después de ejecutar los tests, el reporte HTML se genera automáticamente en:
 
 ```
-build/reports/serenity/index.html
+target/site/serenity/index.html
 ```
 
-Abrir en el navegador para visualizar resultados detallados con capturas de pantalla.
+Abrir ese archivo en el navegador para visualizar:
+- Resultados por escenario y tag
+- Capturas de pantalla de cada paso
+- Historial de pasos Gherkin ejecutados
+- Estadísticas de pasos pasados / fallidos / pendientes
+
+### Regenerar el reporte sin volver a correr los tests
+
+Si ya se ejecutaron los tests y solo quieres regenerar el HTML a partir de los resultados JSON existentes:
+
+```powershell
+./gradlew aggregate
+```
+
+El reporte se actualizará en `target/site/serenity/index.html` sin volver a lanzar el navegador.
+
+### Flujo completo recomendado
+
+```powershell
+# 1. Ejecutar los tests
+./gradlew test
+
+# 2. (Opcional) Regenerar el reporte si fue necesario limpiar
+./gradlew aggregate
+
+# 3. Abrir el reporte en el navegador (Windows)
+start target/site/serenity/index.html
+```
 
 ---
 
@@ -159,11 +201,8 @@ El `.gitignore` excluye los siguientes archivos y carpetas para evitar subir art
 | `@registro @validacion` | Registro con contraseñas que no coinciden |
 | `@login @happy-path` | Login exitoso con credenciales válidas |
 | `@login @validacion` | Login con credenciales incorrectas |
-| `@creacion-ticket @happy-path` | Creación de ticket exitosa |
-| `@creacion-ticket @formulario` | Visualización del formulario de ticket |
-| `@detalle-ticket @happy-path` | Acceso al detalle de un ticket |
-| `@flujo-e2e @smoke` | **Flujo E2E completo** (registro → ticket → detalle) |
-| `@asignaciones @admin` | Acceso a la vista de asignaciones (admin) |
+| `@flujo-e2e @smoke` | **Flujo E2E completo** (login → crear ticket → verificar detalle) |
+| `@asignaciones @admin` | Acceso a la vista de asignaciones (administrador) |
 | `@notificaciones` | Acceso al panel de notificaciones (usuario autenticado) |
 | `@logout` | Cierre de sesión exitoso |
 
