@@ -17,7 +17,7 @@ Feature: Flujo completo E2E del Sistema de Tickets
     When el usuario navega a la página de registro
     And completa el formulario de registro con:
       | username  | email                    | password      |
-      | Brayan398    | userbrayan@test.sofka.com  | brayan2Tess@2027 |
+      | memin398    | userMemin@test.sofka.com  | memmin2Tess@2027 |
     Then debería ser redirigido a la lista de tickets
     And la barra de navegación debería estar visible
 
@@ -56,19 +56,19 @@ Feature: Flujo completo E2E del Sistema de Tickets
 
   @flujo-e2e @smoke
   Scenario: Flujo E2E completo desde registro hasta verificación de ticket
-    Given el usuario navega a la página de login
-    When el usuario ingresa el email "e2eflow2026@test.sofka.com"
-    And ingresa la contraseña "TestPass@2026"
+    Given el usuario "e2eflow2026" con email "e2eflow2026@test.sofka.com" y contraseña "TestPass@2026" existe previamente en el sistema
+    And el usuario navega a la página de login
+    When el usuario ingresa las credenciales almacenadas
     And hace click en el botón de login
     Then debería ser redirigido a la lista de tickets
     When el usuario navega a "Crear Ticket"
-    And completa el formulario de ticket con título "Ticket" y descripción "Este ticket fue creado durante el flujo E2E completo del usuario registrado para validar casa"
+    And completa el formulario de ticket con título "Ticket de jacobo y luis" y descripción "Este ticket fue creado durante el flujo automatizacion"
     And envía el formulario del ticket
     Then debería ser redirigido a la lista de tickets
-    And el ticket "Ticket" debería aparecer en la lista
-    When el usuario hace click en el ticket "Ticket"
+    And el ticket "Ticket de jacobo y luis" debería aparecer en la lista
+    When el usuario hace click en el ticket "Ticket de jacobo y luis"
     Then debería ver el detalle del ticket
-    And el título del detalle debería contener "Ticket"
+    And el título del detalle debería contener "Ticket de jacobo y luis"
 
   # ===========================================================================
   # HU-6: Gestión de asignaciones (administrador)

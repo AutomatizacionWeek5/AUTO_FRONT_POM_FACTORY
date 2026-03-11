@@ -7,6 +7,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.pom.context.TestContext;
 import org.pom.pages.tickets.CreateTicketPage;
 import org.pom.utils.api.ApiHelper;
 import org.pom.utils.config.TestConfig;
@@ -15,13 +16,6 @@ import org.pom.utils.wait.WaitUtils;
 import java.time.Duration;
 import java.util.List;
 
-/**
- * Step Definitions relacionados con la creación de tickets.
- *
- * <p>Responsabilidad única: gestionar todos los pasos del flujo de creación
- * de un ticket, incluyendo el llenado del formulario y el envío con manejo
- * de la latencia del broker de mensajes.
- */
 public class CreateTicketSteps {
 
     @Managed(uniqueSession = false)
@@ -34,12 +28,10 @@ public class CreateTicketSteps {
         return createTicketPage;
     }
 
-    // ----------------------------------------------------------------
-    // Steps - Formulario de creación de ticket
-    // ----------------------------------------------------------------
-
     @When("completa el formulario de ticket con título {string} y descripción {string}")
     public void completaElFormularioDeTicket(String title, String description) {
+        TestContext.get().setTicketTitle(title);
+        TestContext.get().setTicketDescription(description);
         getCreateTicketPage().enterTitle(title);
         getCreateTicketPage().enterDescription(description);
         WaitUtils.demoDelay();
@@ -47,7 +39,7 @@ public class CreateTicketSteps {
 
     @When("envía el formulario del ticket")
     public void enviaElFormularioDelTicket() {
-        // Capturar título y descripción antes del submit para el fallback de verificación
+
         String ticketTitle = captureFieldValue("ticket-title");
         String ticketDescription = captureFieldValue("ticket-description");
         String userId = captureCurrentUserId();
@@ -58,8 +50,6 @@ public class CreateTicketSteps {
 
         getCreateTicketPage().clickSubmit();
 
-        // Esperar hasta 40s: redirect exitoso (fuera de /tickets/new) o error visible en UI.
-        // Bug conocido: pika puede bloquear el worker DESPUÉS de persistir el ticket en DB.
         WebDriverWait submitWait = new WebDriverWait(driver, Duration.ofSeconds(40));
         try {
             submitWait.until(d -> {
@@ -79,8 +69,6 @@ public class CreateTicketSteps {
                 System.out.println("[WARN] Aún en /tickets/new sin error visible; posible timeout silencioso.");
             }
 
-            // El ticket pudo haberse guardado aunque el HTTP devolvió error.
-            // Verificar en la API y solo crearlo si no existe.
             if (!capturedTitle.isEmpty() && !capturedUserId.isEmpty()) {
                 ensureTicketExists(capturedTitle, capturedDescription, capturedUserId);
             }
@@ -90,10 +78,6 @@ public class CreateTicketSteps {
 
         WaitUtils.demoDelay();
     }
-
-    // ----------------------------------------------------------------
-    // Métodos privados de apoyo (no contienen lógica de negocio del test)
-    // ----------------------------------------------------------------
 
     private String captureFieldValue(String fieldId) {
         try {
@@ -125,10 +109,7 @@ public class CreateTicketSteps {
         }
     }
 
-    /**
-     * Verifica si el ticket ya existe en la API y lo crea si no está presente.
-     * Protege contra el caso en que el submit falló por pika pero el ticket quedó en DB.
-     */
+    
     private void ensureTicketExists(String title, String description, String userId) {
         try {
             String safeTitle = title.replace("\\", "\\\\").replace("\"", "\\\"").replace("'", "\\'");

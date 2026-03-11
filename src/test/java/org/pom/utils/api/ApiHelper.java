@@ -9,27 +9,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.List;
 
-/**
- * Métodos utilitarios de auxilio compartidos entre Step Definitions.
- *
- * <p>Centraliza lógica de bajo nivel reutilizable (llamadas API vía fetch del browser,
- * esperas condicionales) para que los Step Definitions no dupliquen código.
- */
 public class ApiHelper {
 
     private ApiHelper() {
-        // Clase de utilidades estáticas — no instanciar.
+
     }
 
-    /**
-     * Realiza un login directo via browser fetch (misma sesión de cookies).
-     * No depende de pika — el endpoint /auth/login/ solo lee la DB y genera JWT.
-     *
-     * @param driver       instancia activa de WebDriver
-     * @param safeEmail    email ya escapado para uso en JS
-     * @param safePassword contraseña ya escapada para uso en JS
-     * @return string "login:{status}" o "login_err:{mensaje}", o {@code null} si hay excepción
-     */
+    
     public static Object apiLogin(WebDriver driver, String safeEmail, String safePassword) {
         try {
             driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(15));
@@ -48,15 +34,7 @@ public class ApiHelper {
         }
     }
 
-    /**
-     * Espera hasta que la página de tickets muestre contenido real en el DOM
-     * (.tickets-grid o .empty-state), o hasta ser redirigido a /login.
-     *
-     * @param driver         instancia activa de WebDriver
-     * @param timeoutSeconds tiempo máximo de espera en segundos
-     * @return {@code true} si la página de tickets cargó (autenticado),
-     *         {@code false} si fue redirigido a /login
-     */
+    
     public static boolean waitForTicketsContent(WebDriver driver, int timeoutSeconds) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutSeconds));
         try {
@@ -67,7 +45,7 @@ public class ApiHelper {
                 return !content.isEmpty();
             });
         } catch (org.openqa.selenium.TimeoutException ignored) {
-            // No apareció ni contenido ni redirección — se asume no autenticado
+
         }
         return !driver.getCurrentUrl().contains("/login");
     }

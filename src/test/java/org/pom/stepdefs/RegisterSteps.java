@@ -1,6 +1,5 @@
 package org.pom.stepdefs;
 
-import io.cucumber.java.Before;
 import io.cucumber.java.en.*;
 import net.serenitybdd.annotations.Managed;
 import org.assertj.core.api.Assertions;
@@ -9,6 +8,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.pom.context.TestContext;
 import org.pom.pages.auth.LoginPage;
 import org.pom.pages.auth.RegisterPage;
 import org.pom.utils.api.ApiHelper;
@@ -19,13 +19,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Step Definitions relacionados con el registro de nuevos usuarios.
- *
- * <p>Responsabilidad única: gestionar todos los pasos del flujo de registro,
- * incluyendo la precondición de creación de usuario de prueba y las validaciones
- * de formulario de registro.
- */
 public class RegisterSteps {
 
     @Managed(uniqueSession = false)
@@ -44,73 +37,6 @@ public class RegisterSteps {
         return loginPage;
     }
 
-    // ----------------------------------------------------------------
-    // Setup hook — pre-crea el usuario de prueba de registro en la DB
-    // ----------------------------------------------------------------
-
-    /**
-     * Pre-crea el usuario de registro en la DB antes de que el escenario UI se ejecute.
-     * Usa Java HttpClient con timeout corto: Django guarda el usuario en DB ANTES de que
-     * pika bloquee, por lo que el registro persiste aunque la llamada dé timeout.
-     */
-    @Before("@registro and @happy-path")
-    public void preCrearUsuarioRegistro() {
-        final String regEmail    = "userNuevo12@test.sofka.com";
-        final String regPassword = "nuevo22Tess@2027";
-        final String regUsername = "ale398";
-
-        java.net.http.HttpClient httpClient = java.net.http.HttpClient.newHttpClient();
-        try {
-            // 1. ¿Ya existe? Intentar login primero (camino rápido)
-            String loginBody = "{\"email\":\"" + regEmail + "\",\"password\":\"" + regPassword + "\"}";
-            java.net.http.HttpRequest loginReq = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("http://localhost:8003/api/auth/login/"))
-                .header("Content-Type", "application/json")
-                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(loginBody))
-                .timeout(Duration.ofSeconds(10))
-                .build();
-            java.net.http.HttpResponse<String> loginResp =
-                httpClient.send(loginReq, java.net.http.HttpResponse.BodyHandlers.ofString());
-            if (loginResp.statusCode() == 200) {
-                System.out.println("[SETUP] Usuario de prueba ya existe (login:200). Nada que hacer.");
-                return;
-            }
-            System.out.println("[SETUP] Usuario no encontrado (login:" + loginResp.statusCode() + "). Registrando...");
-
-            // 2. Registrar con timeout corto: el DB save ocurre ANTES de pika,
-            //    así que aunque la solicitud dé timeout, el usuario queda en BD.
-            String regBody = "{\"username\":\"" + regUsername
-                + "\",\"email\":\"" + regEmail
-                + "\",\"password\":\"" + regPassword + "\"}";
-            java.net.http.HttpRequest regReq = java.net.http.HttpRequest.newBuilder()
-                .uri(java.net.URI.create("http://localhost:8003/api/auth/"))
-                .header("Content-Type", "application/json")
-                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(regBody))
-                .timeout(Duration.ofSeconds(6))
-                .build();
-            try {
-                java.net.http.HttpResponse<String> regResp =
-                    httpClient.send(regReq, java.net.http.HttpResponse.BodyHandlers.ofString());
-                System.out.println("[SETUP] Register HTTP status: " + regResp.statusCode());
-            } catch (java.net.http.HttpTimeoutException toe) {
-                System.out.println("[SETUP] Register timeout (pika bloqueó gunicorn) — usuario en BD.");
-            }
-
-            // 3. Verificar que el usuario quedó creado
-            loginResp = httpClient.send(loginReq, java.net.http.HttpResponse.BodyHandlers.ofString());
-            System.out.println("[SETUP] Verificación post-registro: login:" + loginResp.statusCode());
-
-        } catch (Exception e) {
-            System.out.println("[SETUP] Error en pre-setup: " + e.getMessage());
-        } finally {
-            httpClient.close();
-        }
-    }
-
-    // ----------------------------------------------------------------
-    // Steps - Formulario de Registro
-    // ----------------------------------------------------------------
-
     @When("el usuario navega a la página de registro")
     public void elUsuarioNavegaALaPaginaDeRegistro() {
         getRegisterPage().open();
@@ -123,9 +49,12 @@ public class RegisterSteps {
         String email    = data.get("email");
         String password = data.get("password");
 
+        TestContext.get().setUsername(username);
+        TestContext.get().setEmail(email);
+        TestContext.get().setPassword(password);
+
         getRegisterPage().register(username, email, password);
 
-        // Esperar hasta 40s: redirect exitoso O que aparezca un error
         WebDriverWait resultWait = new WebDriverWait(driver, Duration.ofSeconds(40));
         try {
             resultWait.until(d -> {
@@ -139,7 +68,6 @@ public class RegisterSteps {
 
         String currentUrl = driver.getCurrentUrl();
 
-        // Camino feliz: salió de /register sin pasar por /login
         if (!currentUrl.contains("/register") && !currentUrl.contains("/login")) {
             System.out.println("[INFO] Registro exitoso directo, URL=" + currentUrl);
             WaitUtils.demoDelay();
@@ -154,7 +82,6 @@ public class RegisterSteps {
         String safePassword = password.replace("'", "\\'");
         String safeUsername = username.replace("'", "\\'");
 
-        // ------- Fallback A: login directo via API (sin pika, usuario puede estar en DB) -------
         System.out.println("[INFO] Fallback A: login directo via API...");
         Object loginApiA = ApiHelper.apiLogin(driver, safeEmail, safePassword);
         System.out.println("[INFO] Fallback A resultado: " + loginApiA);
@@ -167,7 +94,6 @@ public class RegisterSteps {
             }
         }
 
-        // ------- Fallback B: Selenium form login -------
         System.out.println("[INFO] Fallback B: login via formulario Selenium...");
         getLoginPage().open();
         boolean loginOkB = getLoginPage().loginAndWaitForRedirect(email, password, 25);
@@ -177,7 +103,6 @@ public class RegisterSteps {
             return;
         }
 
-        // ------- Fallback C: API register + API login inmediato -------
         System.out.println("[INFO] Fallback C: API register + API login directo...");
         try {
             driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(60));
@@ -206,7 +131,6 @@ public class RegisterSteps {
             }
         }
 
-        // ------- Fallback D: Selenium login — último recurso -------
         System.out.println("[INFO] Fallback D: último intento Selenium login...");
         getLoginPage().open();
         boolean loginOkD = getLoginPage().loginAndWaitForRedirect(email, password, 25);
@@ -246,10 +170,6 @@ public class RegisterSteps {
         }
         WaitUtils.demoDelay();
     }
-
-    // ----------------------------------------------------------------
-    // Steps - Validaciones de Registro (Then)
-    // ----------------------------------------------------------------
 
     @Then("debería ver el error {string}")
     public void deberiaVerElError(String errorText) {

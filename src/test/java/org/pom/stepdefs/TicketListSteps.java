@@ -12,12 +12,6 @@ import org.pom.utils.wait.WaitUtils;
 
 import java.time.Duration;
 
-/**
- * Step Definitions relacionados con la lista y el detalle de tickets.
- *
- * <p>Responsabilidad única: gestionar todos los pasos de interacción y
- * validación sobre la lista de tickets y la vista de detalle de un ticket.
- */
 public class TicketListSteps {
 
     @Managed(uniqueSession = false)
@@ -36,24 +30,15 @@ public class TicketListSteps {
         return ticketDetailPage;
     }
 
-    // ----------------------------------------------------------------
-    // Steps - Interacción con la lista de tickets
-    // ----------------------------------------------------------------
-
     @When("el usuario hace click en el ticket {string}")
     public void elUsuarioHaceClickEnElTicket(String ticketTitle) {
         getTicketListPage().waitForLoad();
         getTicketListPage().clickTicketByTitle(ticketTitle);
     }
 
-    // ----------------------------------------------------------------
-    // Steps - Validaciones sobre lista y detalle de tickets (Then)
-    // ----------------------------------------------------------------
-
     @Then("debería ser redirigido a la lista de tickets")
     public void deberiaSaerRedirigidoALaListaDeTickets() {
-        // Esperar 25s para cubrir el caso donde la página aún está cargando
-        // tras la navegación manual realizada por enviaElFormularioDelTicket.
+
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(25));
         wait.until(ExpectedConditions.urlMatches(".*/tickets$"));
         Assertions.assertThat(driver.getCurrentUrl())

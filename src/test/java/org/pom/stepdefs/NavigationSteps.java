@@ -10,13 +10,6 @@ import org.pom.pages.shared.NotificationListPage;
 import org.pom.utils.config.TestConfig;
 import org.pom.utils.wait.WaitUtils;
 
-/**
- * Step Definitions relacionados con la navegación entre secciones de la aplicación.
- *
- * <p>Responsabilidad única: gestionar todos los pasos de navegación (apertura de la
- * app, uso de la barra de navegación, cierre de sesión) y las validaciones de
- * estado de navegación (redirecciones, páginas cargadas).
- */
 public class NavigationSteps {
 
     @Managed(uniqueSession = false)
@@ -41,20 +34,12 @@ public class NavigationSteps {
         return notificationListPage;
     }
 
-    // ----------------------------------------------------------------
-    // Steps - Contexto / Background
-    // ----------------------------------------------------------------
-
     @Given("el usuario navega a la aplicación")
     public void elUsuarioNavegaALaAplicacion() {
         driver.get(TestConfig.BASE_URL);
         WaitUtils.waitUntilUrlContains(driver, TestConfig.BASE_URL);
         WaitUtils.demoDelay();
     }
-
-    // ----------------------------------------------------------------
-    // Steps - Navegación via NavBar
-    // ----------------------------------------------------------------
 
     @When("el usuario navega a {string}")
     public void elUsuarioNavegaA(String destination) {
@@ -86,19 +71,11 @@ public class NavigationSteps {
         elUsuarioNavegaA(destination);
     }
 
-    // ----------------------------------------------------------------
-    // Steps - Cierre de sesión
-    // ----------------------------------------------------------------
-
     @When("el usuario cierra sesión")
     public void elUsuarioCierraSesion() {
         getNavBarPage().logout();
         WaitUtils.demoDelay();
     }
-
-    // ----------------------------------------------------------------
-    // Steps - Validaciones de navegación (Then)
-    // ----------------------------------------------------------------
 
     @Then("debería ser redirigido a la página de login")
     public void deberiaSerRedirigidoALaPaginaDeLogin() {
