@@ -86,13 +86,12 @@ public class TicketListPage {
         urlWait.until(ExpectedConditions.urlMatches(".*/tickets$"));
 
         // Esperar a que aparezca el contenido (grid de tickets o estado vacío).
-        // El spinner del LoadingState usa clase .spinner / .status-container.
-        // Se da hasta 30s para cubrir latencia del backend (pika, etc.)
-        WebDriverWait contentWait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        // Con el fix de pika (socket_timeout=3s) la latencia máxima del backend es ~3s,
+        // por lo que 15s es más que suficiente.
+        WebDriverWait contentWait = new WebDriverWait(driver, Duration.ofSeconds(15));
         contentWait.until(d -> {
             boolean hasGrid   = !d.findElements(By.cssSelector(".tickets-grid")).isEmpty();
             boolean hasEmpty  = !d.findElements(By.cssSelector(".empty-state")).isEmpty();
-            // Considerar que la página terminó de cargar si hay grid o empty (sin spinner)
             return hasGrid || hasEmpty;
         });
     }

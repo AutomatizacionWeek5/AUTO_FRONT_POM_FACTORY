@@ -17,7 +17,7 @@ Feature: Flujo completo E2E del Sistema de Tickets
     When el usuario navega a la página de registro
     And completa el formulario de registro con:
       | username  | email                    | password      |
-      | ale398    | userNuevo12@test.sofka.com  | nuevo22Tess@2027 |
+      | Brayan398    | userbrayan@test.sofka.com  | brayan2Tess@2027 |
     Then debería ser redirigido a la lista de tickets
     And la barra de navegación debería estar visible
 
@@ -62,13 +62,13 @@ Feature: Flujo completo E2E del Sistema de Tickets
     And hace click en el botón de login
     Then debería ser redirigido a la lista de tickets
     When el usuario navega a "Crear Ticket"
-    And completa el formulario de ticket con título "Ticket de usuario otra vez" y descripción "Este ticket fue creado durante el flujo E2E completo del usuario registrado para valuiadar el nuevo ticket"
+    And completa el formulario de ticket con título "Ticket de alejaa" y descripción "Este ticket fue creado durante el flujo E2E completo del usuario registrado para validar casa"
     And envía el formulario del ticket
     Then debería ser redirigido a la lista de tickets
-    And el ticket "Ticket de usuario otra vez" debería aparecer en la lista
-    When el usuario hace click en el ticket "Ticket de usuario otra vez"
+    And el ticket "Ticket de alejaa" debería aparecer en la lista
+    When el usuario hace click en el ticket "Ticket de alejaa"
     Then debería ver el detalle del ticket
-    And el título del detalle debería contener "Ticket de usuario otra vez"
+    And el título del detalle debería contener "Ticket de alejaa"
 
   # ===========================================================================
   # HU-6: Gestión de asignaciones (administrador)
