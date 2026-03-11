@@ -31,8 +31,8 @@ public class LoginSteps {
 
     @Given("un usuario con email {string} y contraseña {string} existe en el sistema")
     public void unUsuarioExisteEnElSistema(String email, String password) {
-
-        System.out.println("Precondición verificada: usuario " + email + " existe en el sistema.");
+        TestContext.get().setEmail(email);
+        TestContext.get().setPassword(password);
     }
 
     @Given("el usuario está autenticado con email {string} y contraseña {string}")

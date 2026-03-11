@@ -38,8 +38,7 @@ Feature: Flujo completo E2E del Sistema de Tickets
   @login @happy-path
   Scenario: Login exitoso con usuario registrado
     Given un usuario con email "admin@sofkau.com" y contraseña "Admin@SofkaU_2026!" existe en el sistema
-    When el usuario introduce el email "admin@sofkau.com"
-    And el usuario introduce la contraseña "Admin@SofkaU_2026!"
+    When el usuario ingresa las credenciales almacenadas
     And el usuario hace click en "Iniciar sesión"
     Then debería ser redirigido a la lista de tickets
 
