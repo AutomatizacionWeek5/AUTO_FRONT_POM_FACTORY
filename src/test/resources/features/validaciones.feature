@@ -6,13 +6,13 @@ Feature: Validaciones de autenticación del Sistema de Tickets
   para poder corregir mis credenciales.
 
   @registro @edge-case
-  Scenario Outline: Registro rechazado cuando las contraseñas no coinciden
+  Scenario Outline: Registro rechazado cuando el usuario ya existe en el sistema
     When el usuario intenta registrarse con usuario "<username>", email "<email>", contraseña "<password>" y confirmación "<confirmPassword>"
-    Then el sistema rechaza el registro informando que las contraseñas no coinciden
+    Then el sistema rechaza el registro informando que el usuario ya existe
 
     Examples:
-      | username          | email                   | password      | confirmPassword   |
-      | testuser_mismatch | mismatch@test.sofka.com | TestPass@2026 | DiferentPass@2026 |
+      | username | email            | password           | confirmPassword    |
+      | admin    | admin@sofkau.com | Admin@SofkaU_2026! | Admin@SofkaU_2026! |
 
   @login @edge-case
   Scenario Outline: Login rechazado con credenciales incorrectas

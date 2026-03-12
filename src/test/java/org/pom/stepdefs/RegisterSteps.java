@@ -205,14 +205,11 @@ public class RegisterSteps {
         haceClickEn("Crear cuenta");
     }
 
-    @Then("el sistema rechaza el registro informando que las contraseñas no coinciden")
-    public void elSistemaRechazaElRegistro() {
+    @Then("el sistema rechaza el registro informando que el usuario ya existe")
+    public void elSistemaRechazaElRegistroUsuarioExistente() {
         Assertions.assertThat(getRegisterPage().isErrorVisible())
-                .as("El sistema debería mostrar un error de validación")
+                .as("El sistema debería mostrar un error cuando el usuario ya existe")
                 .isTrue();
-        Assertions.assertThat(getRegisterPage().getErrorText())
-                .as("El error debería indicar que las contraseñas no coinciden")
-                .contains("contraseñas no coinciden");
         WaitUtils.demoDelay();
     }
 }

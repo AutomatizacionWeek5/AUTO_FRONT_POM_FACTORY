@@ -2,10 +2,8 @@ package org.pom.stepdefs;
 
 import io.cucumber.java.en.*;
 import net.serenitybdd.annotations.Managed;
-import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.pom.context.TestContext;
 import org.pom.pages.shared.NavBarPage;
@@ -15,7 +13,6 @@ import org.pom.utils.config.TestConfig;
 import org.pom.utils.wait.WaitUtils;
 
 import java.time.Duration;
-import java.util.List;
 
 public class CreateTicketSteps {
 
@@ -53,22 +50,14 @@ public class CreateTicketSteps {
 
         WebDriverWait submitWait = new WebDriverWait(driver, Duration.ofSeconds(40));
         try {
-            submitWait.until(d -> {
-                if (!d.getCurrentUrl().contains("/tickets/new")) return true;
-                return !d.findElements(By.cssSelector(".error-alert")).isEmpty();
-            });
+            submitWait.until(d -> !d.getCurrentUrl().contains("/tickets/new"));
         } catch (org.openqa.selenium.TimeoutException ignored) {
             System.out.println("[WARN] Timeout de 40s esperando resultado tras submit del ticket.");
         }
 
         String currentUrl = driver.getCurrentUrl();
         if (currentUrl.contains("/tickets/new")) {
-            List<WebElement> errorAlerts = driver.findElements(By.cssSelector(".error-alert"));
-            if (!errorAlerts.isEmpty()) {
-                System.out.println("[INFO] Error en UI al crear ticket: '" + errorAlerts.get(0).getText() + "'.");
-            } else {
-                System.out.println("[WARN] Aún en /tickets/new sin error visible; posible timeout silencioso.");
-            }
+            System.out.println("[WARN] Aún en /tickets/new; posible timeout silencioso.");
 
             if (!capturedTitle.isEmpty() && !capturedUserId.isEmpty()) {
                 ensureTicketExists(capturedTitle, capturedDescription, capturedUserId);
