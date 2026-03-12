@@ -17,7 +17,6 @@ import org.pom.utils.wait.WaitUtils;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
 public class RegisterSteps {
 
@@ -42,13 +41,8 @@ public class RegisterSteps {
         getRegisterPage().open();
     }
 
-    @When("completa el formulario de registro con:")
-    public void completaElFormularioDeRegistroCon(List<Map<String, String>> dataTable) {
-        Map<String, String> data = dataTable.get(0);
-        String username = data.get("username");
-        String email    = data.get("email");
-        String password = data.get("password");
-
+    @When("completa el formulario de registro con username {string}, email {string} y contraseña {string}")
+    public void completaElFormularioDeRegistro(String username, String email, String password) {
         TestContext.get().setUsername(username);
         TestContext.get().setEmail(email);
         TestContext.get().setPassword(password);

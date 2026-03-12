@@ -9,13 +9,9 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.pom.context.TestContext;
 import org.pom.pages.auth.LoginPage;
-import org.pom.utils.api.ApiHelper;
-import org.pom.utils.config.TestConfig;
 import org.pom.utils.wait.WaitUtils;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 
 public class LoginSteps {
 
@@ -27,12 +23,6 @@ public class LoginSteps {
     private LoginPage getLoginPage() {
         if (loginPage == null) loginPage = new LoginPage(driver);
         return loginPage;
-    }
-
-    @Given("un usuario con email {string} y contraseña {string} existe en el sistema")
-    public void unUsuarioExisteEnElSistema(String email, String password) {
-        TestContext.get().setEmail(email);
-        TestContext.get().setPassword(password);
     }
 
     @Given("el usuario está autenticado con email {string} y contraseña {string}")
@@ -68,18 +58,6 @@ public class LoginSteps {
         WaitUtils.demoDelay();
     }
 
-    @When("el usuario ingresa el email {string}")
-    public void elUsuarioIngresaElEmail(String email) {
-        TestContext.get().setEmail(email);
-        getLoginPage().enterEmail(email);
-    }
-
-    @When("ingresa la contraseña {string}")
-    public void ingresaLaContrasena(String password) {
-        TestContext.get().setPassword(password);
-        getLoginPage().enterPassword(password);
-    }
-
     @When("el usuario ingresa las credenciales almacenadas")
     public void elUsuarioIngresaLasCredencialesAlmacenadas() {
         getLoginPage().enterEmail(TestContext.get().getEmail());
@@ -96,27 +74,6 @@ public class LoginSteps {
                 ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".auth-error"))
             ));
         } catch (org.openqa.selenium.TimeoutException ignored) {}
-        WaitUtils.demoDelay();
-    }
-
-    @When("completa el formulario de login con:")
-    public void completaElFormularioDeLoginCon(List<Map<String, String>> dataTable) {
-        Map<String, String> data = dataTable.get(0);
-        String email    = data.get("email");
-        String password = data.get("password");
-        String safeEmail    = email.replace("'", "\\'");
-        String safePassword = password.replace("'", "\\'");
-
-        Object loginResult = ApiHelper.apiLogin(driver, safeEmail, safePassword);
-        if (loginResult != null && String.valueOf(loginResult).startsWith("login:200")) {
-            driver.get(TestConfig.BASE_URL + "/tickets");
-            if (ApiHelper.waitForTicketsContent(driver, 15)) {
-                WaitUtils.demoDelay();
-                return;
-            }
-        }
-        boolean ok = getLoginPage().loginAndWaitForRedirect(email, password, 25);
-        if (!ok) driver.get(TestConfig.BASE_URL + "/tickets");
         WaitUtils.demoDelay();
     }
 

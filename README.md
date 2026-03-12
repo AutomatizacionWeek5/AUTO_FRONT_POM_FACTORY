@@ -42,7 +42,10 @@ src/
     │           └── wait/WaitUtils.java       # Esperas explícitas
     └── resources/
         ├── features/
-        │   └── sistema_tickets_e2e.feature   # Escenarios Gherkin (E2E)
+        │   ├── registro.feature          # HU-1: Registro (Scenario Outline)
+        │   ├── validaciones.feature      # Edge cases: registro y login inválidos (Scenario Outline)
+        │   ├── flujo_e2e.feature         # HU-5: Flujo completo E2E (Scenario Outline)
+        │   └── gestion.feature           # HU-6/7: Asignaciones, notificaciones y logout
         ├── serenity.conf                     # Configuración Serenity (HOCON)
         └── serenity.properties               # Propiedades Serenity
 ```
@@ -74,37 +77,107 @@ La aplicación estará disponible en `http://localhost:3000`.
 
 ---
 
-### Ejecutar por tag (escenario individual)
-
-> **Nota PowerShell:** el carácter `@` es un operador especial en PowerShell. El argumento completo `-D` debe ir entre comillas dobles externas. Siempre usar `"-Dpropiedad=valor"`.
-
-| Qué ejecuta | PowerShell (Windows) | Bash / Git Bash / Linux / Mac |
-|---|---|---|
-| Flujo E2E completo (smoke) | `./gradlew test "-Dcucumber.filter.tags=@smoke"` | `./gradlew test -Dcucumber.filter.tags="@smoke"` |
-| Flujo E2E completo | `./gradlew test "-Dcucumber.filter.tags=@flujo-e2e"` | `./gradlew test -Dcucumber.filter.tags="@flujo-e2e"` |
-| Registro de usuario | `./gradlew test "-Dcucumber.filter.tags=@registro"` | `./gradlew test -Dcucumber.filter.tags="@registro"` |
-| Solo registro exitoso | `./gradlew test "-Dcucumber.filter.tags=@registro and @happy-path"` | `./gradlew test -Dcucumber.filter.tags="@registro and @happy-path"` |
-| Solo validaciones de registro | `./gradlew test "-Dcucumber.filter.tags=@registro and @validacion"` | `./gradlew test -Dcucumber.filter.tags="@registro and @validacion"` |
-| Login | `./gradlew test "-Dcucumber.filter.tags=@login"` | `./gradlew test -Dcucumber.filter.tags="@login"` |
-| Solo login exitoso | `./gradlew test "-Dcucumber.filter.tags=@login and @happy-path"` | `./gradlew test -Dcucumber.filter.tags="@login and @happy-path"` |
-| Solo validaciones de login | `./gradlew test "-Dcucumber.filter.tags=@login and @validacion"` | `./gradlew test -Dcucumber.filter.tags="@login and @validacion"` |
-| Asignaciones (admin) | `./gradlew test "-Dcucumber.filter.tags=@asignaciones"` | `./gradlew test -Dcucumber.filter.tags="@asignaciones"` |
-| Notificaciones | `./gradlew test "-Dcucumber.filter.tags=@notificaciones"` | `./gradlew test -Dcucumber.filter.tags="@notificaciones"` |
-| Logout | `./gradlew test "-Dcucumber.filter.tags=@logout"` | `./gradlew test -Dcucumber.filter.tags="@logout"` |
+> **Nota PowerShell:** el carácter `@` es especial en PowerShell. El argumento `-D` siempre debe ir entre comillas dobles externas: `"-Dpropiedad=valor"`.
 
 ---
 
-### Combinar y excluir tags
+### 1. Solo registro (happy path)
+
+Ejecuta el `Scenario Outline` de `registro.feature` — crea usuarios nuevos vía UI (2 iteraciones).
 
 ```powershell
-# Ejecutar smoke Y login
-./gradlew test "-Dcucumber.filter.tags=@smoke or @login"
+# PowerShell
+./gradlew test "-Dcucumber.filter.tags=@registro and @happy-path"
+```
+```bash
+# Bash / Git Bash / Linux / Mac
+./gradlew test -Dcucumber.filter.tags="@registro and @happy-path"
+```
 
-# Ejecutar todo excepto validaciones
-./gradlew test "-Dcucumber.filter.tags=not @validacion"
+---
 
-# Ejecutar happy-path de todos los módulos
-./gradlew test "-Dcucumber.filter.tags=@happy-path"
+### 2. Solo validaciones (edge cases)
+
+Ejecuta los dos `Scenario Outline` de `validaciones.feature`: contraseñas no coinciden + credenciales incorrectas (2 iteraciones cada uno).
+
+```powershell
+# Todas las validaciones juntas
+./gradlew test "-Dcucumber.filter.tags=@edge-case"
+
+# Solo validaciones de registro
+./gradlew test "-Dcucumber.filter.tags=@registro and @edge-case"
+
+# Solo validaciones de login
+./gradlew test "-Dcucumber.filter.tags=@login and @edge-case"
+```
+```bash
+./gradlew test -Dcucumber.filter.tags="@edge-case"
+./gradlew test -Dcucumber.filter.tags="@registro and @edge-case"
+./gradlew test -Dcucumber.filter.tags="@login and @edge-case"
+```
+
+---
+
+### 3. Solo flujo E2E
+
+Ejecuta el `Scenario Outline` de `flujo_e2e.feature`: login → crear ticket → verificar detalle (2 iteraciones).
+
+```powershell
+./gradlew test "-Dcucumber.filter.tags=@flujo-e2e"
+
+# Alias smoke (mismo escenario)
+./gradlew test "-Dcucumber.filter.tags=@smoke"
+```
+```bash
+./gradlew test -Dcucumber.filter.tags="@flujo-e2e"
+./gradlew test -Dcucumber.filter.tags="@smoke"
+```
+
+---
+
+### 4. Solo gestión (asignaciones + notificaciones + logout juntos)
+
+Ejecuta los tres escenarios de `gestion.feature` en una sola pasada.
+
+```powershell
+./gradlew test "-Dcucumber.filter.tags=@gestion"
+```
+```bash
+./gradlew test -Dcucumber.filter.tags="@gestion"
+```
+
+Si necesitas ejecutar cada uno por separado:
+
+```powershell
+# Solo asignaciones
+./gradlew test "-Dcucumber.filter.tags=@asignaciones"
+
+# Solo notificaciones
+./gradlew test "-Dcucumber.filter.tags=@notificaciones"
+
+# Solo logout
+./gradlew test "-Dcucumber.filter.tags=@logout"
+```
+
+---
+
+### 5. Todo excepto edge cases
+
+Ejecuta registro, flujo E2E y gestión — omite los `Scenario Outline` de validaciones.
+
+```powershell
+./gradlew test "-Dcucumber.filter.tags=not @edge-case"
+```
+```bash
+./gradlew test -Dcucumber.filter.tags="not @edge-case"
+```
+
+---
+
+### 6. Suite completa
+
+```powershell
+./gradlew test
 ```
 
 ---
@@ -112,13 +185,13 @@ La aplicación estará disponible en `http://localhost:3000`.
 ### Opciones adicionales
 
 ```powershell
-# Sin retraso de demo (ejecución más rápida)
+# Sin retraso entre pasos (ejecución más rápida)
 ./gradlew test "-Ddemo.delay=0"
 
 # Cambiar la URL base de la aplicación
 ./gradlew test "-Dwebdriver.base.url=http://mi-servidor:3000"
 
-# Combinar: smoke sin demo delay
+# Combinar opciones: flujo E2E sin delay
 ./gradlew test "-Dcucumber.filter.tags=@smoke" "-Ddemo.delay=0"
 ```
 
@@ -195,16 +268,15 @@ El `.gitignore` excluye los siguientes archivos y carpetas para evitar subir art
 
 ## Escenarios Cubiertos
 
-| Tag | Escenario |
-|-----|-----------|
-| `@registro @happy-path` | Registro exitoso de usuario nuevo |
-| `@registro @validacion` | Registro con contraseñas que no coinciden |
-| `@login @happy-path` | Login exitoso con credenciales válidas |
-| `@login @validacion` | Login con credenciales incorrectas |
-| `@flujo-e2e @smoke` | **Flujo E2E completo** (login → crear ticket → verificar detalle) |
-| `@asignaciones @admin` | Acceso a la vista de asignaciones (administrador) |
-| `@notificaciones` | Acceso al panel de notificaciones (usuario autenticado) |
-| `@logout` | Cierre de sesión exitoso |
+| Feature | Tag(s) | Tipo | Iteraciones |
+|---------|--------|------|-------------|
+| `registro.feature` | `@registro @happy-path` | Scenario Outline | 2 (anyi398, maria398) |
+| `validaciones.feature` | `@registro @edge-case` | Scenario Outline | 2 (passwords no coinciden) |
+| `validaciones.feature` | `@login @edge-case` | Scenario Outline | 2 (credenciales inválidas) |
+| `flujo_e2e.feature` | `@flujo-e2e @smoke` | Scenario Outline | 2 (e2eflow2026, e2eflow2027) |
+| `gestion.feature` | `@asignaciones @admin` | Scenario | 1 |
+| `gestion.feature` | `@notificaciones` | Scenario | 1 |
+| `gestion.feature` | `@logout` | Scenario | 1 |
 
 ---
 
