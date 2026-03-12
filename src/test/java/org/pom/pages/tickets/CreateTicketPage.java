@@ -27,10 +27,6 @@ public class CreateTicketPage {
     @FindBy(css = "button.form-button[type='submit']")
     private WebElement submitButton;
 
-    
-    @FindBy(css = ".error-alert")
-    private WebElement errorAlert;
-
     public CreateTicketPage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
@@ -86,24 +82,6 @@ public class CreateTicketPage {
             return titleInput.isDisplayed();
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    
-    public boolean isErrorVisible() {
-        try {
-            return errorAlert.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    
-    public String getErrorText() {
-        try {
-            return errorAlert.getText();
-        } catch (Exception e) {
-            return "";
         }
     }
 }

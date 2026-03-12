@@ -10,10 +10,7 @@ public class NavBarPage {
 
     private final WebDriver driver;
 
-    @FindBy(css = "a.navbar__logo, a[href='/tickets'].navbar__logo")
-    private WebElement logoLink;
-
-    @FindBy(css = "a[href='/tickets'][class*='navbar__link']:not([href='/tickets/new'])")
+@FindBy(css = "a[href='/tickets'][class*='navbar__link']:not([href='/tickets/new'])")
     private WebElement ticketsNavLink;
 
     @FindBy(css = "a[href='/tickets/new']")
@@ -26,16 +23,8 @@ public class NavBarPage {
     private WebElement assignmentsNavLink;
 
     
-    @FindBy(css = ".navbar__badge")
-    private WebElement notificationBadge;
-
-    
     @FindBy(css = "button.navbar__logout, button[class*='logout']")
     private WebElement logoutButton;
-
-    
-    @FindBy(css = "button.navbar__hamburger")
-    private WebElement hamburgerButton;
 
     public NavBarPage(WebDriver driver) {
         this.driver = driver;
@@ -77,31 +66,4 @@ public class NavBarPage {
         WaitUtils.demoDelay();
     }
 
-    
-    public boolean isAssignmentsLinkVisible() {
-        try {
-            return assignmentsNavLink.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    
-    public boolean isNotificationBadgeVisible() {
-        try {
-            return notificationBadge.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    
-    public int getNotificationCount() {
-        try {
-            WaitUtils.waitUntilVisible(driver, notificationBadge);
-            return Integer.parseInt(notificationBadge.getText().trim());
-        } catch (Exception e) {
-            return 0;
-        }
-    }
 }

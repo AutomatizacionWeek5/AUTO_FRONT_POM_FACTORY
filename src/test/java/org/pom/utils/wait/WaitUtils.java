@@ -29,12 +29,6 @@ public class WaitUtils {
     }
 
     
-    public static void waitUntilTextPresent(WebDriver driver, WebElement element, String expectedText) {
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS));
-        wait.until(ExpectedConditions.textToBePresentInElement(element, expectedText));
-    }
-
-    
     public static void waitUntilUrlContains(WebDriver driver, String urlFragment) {
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(DEFAULT_TIMEOUT_SECONDS));
         wait.until(ExpectedConditions.urlContains(urlFragment));
@@ -51,14 +45,4 @@ public class WaitUtils {
         }
     }
 
-    
-    public static void demoDelay(int seconds) {
-        if (seconds > 0) {
-            try {
-                Thread.sleep((long) seconds * 1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
 }

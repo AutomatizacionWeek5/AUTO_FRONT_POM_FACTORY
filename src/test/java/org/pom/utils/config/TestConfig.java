@@ -14,11 +14,6 @@ public class TestConfig {
     public static final String ADMIN_EMAIL    = "admin@sofkau.com";
     public static final String ADMIN_PASSWORD = "Admin@SofkaU_2026!";
 
-    
-    public static final String TEST_USER_EMAIL    = "testuser_e2e@example.com";
-    public static final String TEST_USER_PASSWORD = "TestPass@2026";
-    public static final String TEST_USER_USERNAME = "testuser_e2e";
-
     private TestConfig() {
 
     }

@@ -8,7 +8,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.pom.context.TestContext;
 import org.pom.pages.shared.NavBarPage;
 import org.pom.pages.tickets.CreateTicketPage;
-import org.pom.utils.api.ApiHelper;
 import org.pom.utils.config.TestConfig;
 import org.pom.utils.wait.WaitUtils;
 

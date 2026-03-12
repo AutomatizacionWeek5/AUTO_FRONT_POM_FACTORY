@@ -25,14 +25,8 @@ public class LoginPage {
     @FindBy(css = "button.btn-primary[type='submit']")
     private WebElement loginButton;
 
-    @FindBy(css = "a.btn-secondary[href='/register']")
-    private WebElement registerLink;
-
     @FindBy(css = ".auth-error")
     private WebElement errorMessage;
-
-    @FindBy(css = ".auth-title")
-    private WebElement pageTitle;
 
     public LoginPage(WebDriver driver) {
         this.driver = driver;
@@ -65,12 +59,6 @@ public class LoginPage {
         WaitUtils.demoDelay();
     }
 
-    public void clickRegisterLink() {
-        WaitUtils.waitUntilClickable(driver, registerLink);
-        registerLink.click();
-        WaitUtils.demoDelay();
-    }
-
     public void login(String email, String password) {
         enterEmail(email);
         enterPassword(password);
@@ -95,28 +83,6 @@ public class LoginPage {
         try {
             WaitUtils.waitUntilVisible(driver, errorMessage);
             return errorMessage.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public String getErrorText() {
-        try {
-            return errorMessage.getText();
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-   
-    public String getPageTitle() {
-        WaitUtils.waitUntilVisible(driver, pageTitle);
-        return pageTitle.getText();
-    }
-
-    public boolean isLoaded() {
-        try {
-            return getPageTitle().contains("TicketSystem");
         } catch (Exception e) {
             return false;
         }
