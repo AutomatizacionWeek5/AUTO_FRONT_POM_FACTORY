@@ -57,4 +57,9 @@ public class UserSetupSteps {
             httpClient.close();
         }
     }
+
+    @Given("el usuario {string} existe en el sistema con email {string} y contraseña {string}")
+    public void elUsuarioExisteEnElSistema(String username, String email, String password) {
+        elUsuarioExistePreviamenteEnElSistema(username, email, password);
+    }
 }

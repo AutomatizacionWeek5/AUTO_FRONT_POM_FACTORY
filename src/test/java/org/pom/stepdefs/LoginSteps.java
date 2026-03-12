@@ -84,4 +84,28 @@ public class LoginSteps {
                 .isTrue();
         WaitUtils.demoDelay();
     }
+
+    // -------------------------------------------------------------------------
+    // BDD behavior-level steps
+    // -------------------------------------------------------------------------
+
+    @When("el usuario inicia sesión")
+    public void elUsuarioIniciaSesion() {
+        elUsuarioNavegaALaPaginaDeLogin();
+        elUsuarioIngresaLasCredencialesAlmacenadas();
+        haceClickEnElBotonDeLogin();
+    }
+
+    @When("el usuario intenta iniciar sesión con email {string} y contraseña {string}")
+    public void elUsuarioIntentaIniciarSesion(String email, String password) {
+        elUsuarioNavegaALaPaginaDeLogin();
+        elUsuarioIntroduceElEmail(email);
+        elUsuarioIntroduceLaContrasena(password);
+        elUsuarioHaceClickEn("Iniciar sesión");
+    }
+
+    @Then("el sistema rechaza el acceso con un mensaje de error")
+    public void elSistemaRechazaElAcceso() {
+        deberiaVerUnMensajeDeErrorDeAutenticacion();
+    }
 }

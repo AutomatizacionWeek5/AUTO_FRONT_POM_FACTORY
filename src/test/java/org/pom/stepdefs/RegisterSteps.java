@@ -175,4 +175,44 @@ public class RegisterSteps {
                 .contains(errorText);
         WaitUtils.demoDelay();
     }
+
+    // -------------------------------------------------------------------------
+    // BDD behavior-level steps
+    // -------------------------------------------------------------------------
+
+    @When("el usuario se registra con usuario {string}, email {string} y contraseña {string}")
+    public void elUsuarioSeRegistra(String username, String email, String password) {
+        elUsuarioNavegaALaPaginaDeRegistro();
+        completaElFormularioDeRegistro(username, email, password);
+    }
+
+    @Then("el usuario queda autenticado en el sistema")
+    public void elUsuarioQuedaAutenticadoEnElSistema() {
+        WaitUtils.waitUntilUrlContains(driver, "/tickets");
+        Assertions.assertThat(driver.getCurrentUrl())
+                .as("El usuario debería estar autenticado y ver la lista de tickets")
+                .containsPattern(".*/tickets.*");
+        WaitUtils.demoDelay();
+    }
+
+    @When("el usuario intenta registrarse con usuario {string}, email {string}, contraseña {string} y confirmación {string}")
+    public void elUsuarioIntentaRegistrarse(String username, String email, String password, String confirmPassword) {
+        elUsuarioNavegaALaPaginaDeRegistro();
+        introduceElNombreDeUsuario(username);
+        introduceElEmail(email);
+        introducelaContrasena(password);
+        introducelaConfirmacionDeContrasena(confirmPassword);
+        haceClickEn("Crear cuenta");
+    }
+
+    @Then("el sistema rechaza el registro informando que las contraseñas no coinciden")
+    public void elSistemaRechazaElRegistro() {
+        Assertions.assertThat(getRegisterPage().isErrorVisible())
+                .as("El sistema debería mostrar un error de validación")
+                .isTrue();
+        Assertions.assertThat(getRegisterPage().getErrorText())
+                .as("El error debería indicar que las contraseñas no coinciden")
+                .contains("contraseñas no coinciden");
+        WaitUtils.demoDelay();
+    }
 }

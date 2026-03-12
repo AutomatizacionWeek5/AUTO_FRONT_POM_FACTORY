@@ -4,6 +4,7 @@ import io.cucumber.java.en.*;
 import net.serenitybdd.annotations.Managed;
 import org.assertj.core.api.Assertions;
 import org.openqa.selenium.WebDriver;
+import org.pom.pages.auth.LoginPage;
 import org.pom.pages.tickets.AssignmentListPage;
 import org.pom.pages.shared.NavBarPage;
 import org.pom.pages.shared.NotificationListPage;
@@ -109,5 +110,48 @@ public class NavigationSteps {
                 .as("La página de notificaciones debería estar cargada")
                 .isTrue();
         WaitUtils.demoDelay();
+    }
+
+    // -------------------------------------------------------------------------
+    // BDD behavior-level steps
+    // -------------------------------------------------------------------------
+
+    @Given("el administrador está autenticado en el sistema")
+    public void elAdministradorEstaAutenticadoEnElSistema() {
+        driver.get(TestConfig.BASE_URL);
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(TestConfig.ADMIN_EMAIL, TestConfig.ADMIN_PASSWORD);
+        WaitUtils.waitUntilUrlContains(driver, "/tickets");
+        WaitUtils.demoDelay();
+    }
+
+    @Given("el usuario está autenticado en el sistema")
+    public void elUsuarioEstaAutenticadoEnElSistema() {
+        elAdministradorEstaAutenticadoEnElSistema();
+    }
+
+    @When("consulta las asignaciones")
+    public void consultaLasAsignaciones() {
+        elUsuarioNavegaA("Asignaciones");
+    }
+
+    @Then("puede ver la lista de asignaciones")
+    public void puedeVerLaListaDeAsignaciones() {
+        laPaginaDeAsignacionesDeberiaEstarCargada();
+    }
+
+    @When("consulta sus notificaciones")
+    public void consultaSusNotificaciones() {
+        elUsuarioNavegaA("Notificaciones");
+    }
+
+    @Then("puede ver el panel de notificaciones")
+    public void puedeVerElPanelDeNotificaciones() {
+        laPaginaDeNotificacionesDeberiaEstarCargada();
+    }
+
+    @Then("la sesión queda cerrada y es redirigido al inicio de sesión")
+    public void laSesionQuedaCerradaYEsRedirigido() {
+        deberiaSerRedirigidoALaPaginaDeLogin();
     }
 }
