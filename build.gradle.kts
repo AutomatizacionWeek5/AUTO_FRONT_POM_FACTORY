@@ -1,3 +1,5 @@
+import java.net.URLClassLoader
+
 plugins {
     id("java")
 }
@@ -15,6 +17,7 @@ val cucumberVersion    = "7.15.0"
 dependencies {
     testImplementation("net.serenity-bdd:serenity-core:$serenityCoreVersion")
     testImplementation("net.serenity-bdd:serenity-cucumber:$serenityCoreVersion")
+    testImplementation("net.serenity-bdd:serenity-screenplay:$serenityCoreVersion")
     testImplementation("net.serenity-bdd:serenity-screenplay-webdriver:$serenityCoreVersion")
 
     testImplementation("io.cucumber:cucumber-java:$cucumberVersion")
@@ -40,20 +43,27 @@ tasks.test {
     useJUnit()
 
     systemProperties(System.getProperties().toMap() as Map<String, Any>)
+    systemProperty("serenity.outputDirectory", layout.projectDirectory.dir("target/site/serenity").asFile.absolutePath)
+    systemProperty("serenity.project.name", rootProject.name)
 
     outputs.dir("target/site/serenity")
+    finalizedBy("aggregate")
 }
 
-tasks.register<JavaExec>("aggregate") {
+tasks.register("aggregate") {
     group = "Serenity BDD"
-    description = "Re-agrega los resultados JSON de Serenity en un reporte HTML"
-
-    mainClass.set("net.thucydides.core.reports.html.HtmlAggregateStoryReporter")
-    classpath = configurations.testRuntimeClasspath.get()
-    args = listOf(
-        "--sourceDirectory", layout.buildDirectory.dir("../target/site/serenity").get().asFile.absolutePath,
-        "--outputDirectory", layout.buildDirectory.dir("../target/site/serenity").get().asFile.absolutePath,
-        "--projectName", rootProject.name
-    )
-    isIgnoreExitValue = true
+    description = "Genera el reporte HTML agregado de Serenity"
+    mustRunAfter("test")
+    doLast {
+        val outputDir = layout.projectDirectory.dir("target/site/serenity").asFile
+        val urls = configurations.getByName("testRuntimeClasspath").map { it.toURI().toURL() }.toTypedArray()
+        val cl = URLClassLoader(urls, Thread.currentThread().contextClassLoader)
+        val rc = cl.loadClass("net.thucydides.core.reports.html.HtmlAggregateStoryReporter")
+        val reporter = rc.getDeclaredConstructor(String::class.java).newInstance(rootProject.name)
+        rc.getMethod("setSourceDirectory", File::class.java).invoke(reporter, outputDir)
+        rc.getMethod("setOutputDirectory", File::class.java).invoke(reporter, outputDir)
+        rc.getMethod("generateReportsForTestResultsFrom", File::class.java).invoke(reporter, outputDir)
+        cl.close()
+    }
 }
+
